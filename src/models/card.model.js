@@ -1,5 +1,6 @@
 import Joi from 'joi';
 import { getDB } from '~/config/mongodb.js';
+import { ObjectID } from 'mongodb';
 
 const cardCollectionName = 'cards';
 const cardCollectionSchema = Joi.object({
@@ -18,15 +19,19 @@ const validateSchema = async (data) => {
 
 const createNew = async (data) => {
     try {
-        const value = await validateSchema(data);
-        console.log('value: ', value)
+        const validatedValue = await validateSchema(data);
+        const insertValue = {
+            ...validatedValue,
+            boardId: ObjectID(validatedValue.boardId),
+            columnId: ObjectID(validatedValue.columnId)
+        }
 
-        const result = await getDB().collection(cardCollectionName).insertOne(value);
+        const result = await getDB().collection(cardCollectionName).insertOne(insertValue);
         console.log('result: ', result);
-        return value;
+        return insertValue;
     } catch (error) {
         throw new Error(error);
     }
 }
 
-export const CardModel = { createNew }
+export const CardModel = { cardCollectionName, createNew }
