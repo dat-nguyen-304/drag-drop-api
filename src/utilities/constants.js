@@ -5,3 +5,9 @@ export const HttpStatusCode = {
     NOT_FOUND: 404,
     INTERNAL_SERVER: 500
 }
+
+export const WHITE_LIST_DOMAINS = [
+    'http://localhost:3000',
+    'http://localhost:3001',
+    'http://localhost:8017'
+]

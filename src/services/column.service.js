@@ -1,5 +1,6 @@
 import { ColumnModel } from "~/models/column.model";
 import { BoardModel } from "~/models/board.model";
+import { CardModel } from "../models/card.model";
 
 const createNew = async (data) => {
     try {
@@ -7,6 +8,7 @@ const createNew = async (data) => {
         const boardId = newColumn.boardId.toString();
         const newColumnId = newColumn._id.toString();
         await BoardModel.pushColumnOrder(boardId, newColumnId);
+        newColumn.cards = [];
         return newColumn;
     } catch (error) {
         throw new Error(error);
@@ -19,7 +21,13 @@ const update = async (id, data) => {
             ...data,
             updatedAt: Date.now()
         }
+        if (updateData._id) delete updateData._id;
+        if (updateData.cards) delete updateData.cards;
+
         const result = await ColumnModel.update(id, updateData);
+        if (updateData._destroy) {
+            CardModel.deleteByColumn(updateData.cardOrder);
+        }
         return result;
     } catch (error) {
         throw new Error(error);

@@ -34,4 +34,17 @@ const createNew = async (data) => {
     }
 }
 
-export const CardModel = { cardCollectionName, createNew }
+const deleteByColumn = async (ids) => {
+    try {
+        ids = ids.map(id => ObjectID(id));
+        const result = await getDB().collection(cardCollectionName).updateMany(
+            { _id: { $in: ids } },
+            { $set: { _destroy: true } }
+        )
+        return result;
+    } catch (e) {
+        throw new Error(e);
+    }
+}
+
+export const CardModel = { cardCollectionName, createNew, deleteByColumn }

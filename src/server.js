@@ -1,4 +1,6 @@
 import express from 'express';
+import cors from 'cors';
+import corsOptions from './config/cors';
 import { mapOrder } from '~/utilities/sorts.js';
 import { connectDB } from '~/config/mongodb.js';
 import { env } from '~/config/environment.js';
@@ -15,6 +17,7 @@ connectDB()
 
 const boostServer = () => {
     const app = express();
+    app.use(cors(corsOptions));
     app.use(express.json());
     app.use('/v1', apiV1);
     app.listen(env.APP_PORT, env.APP_HOST, () => {
