@@ -4,7 +4,8 @@ import { CardModel } from "../models/card.model";
 
 const createNew = async (data) => {
     try {
-        const newColumn = await ColumnModel.createNew(data);
+        const createdColumn = await ColumnModel.createNew(data);
+        const newColumn = await ColumnModel.findOneById(createdColumn.insertedId.toString());
         const boardId = newColumn.boardId.toString();
         const newColumnId = newColumn._id.toString();
         await BoardModel.pushColumnOrder(boardId, newColumnId);

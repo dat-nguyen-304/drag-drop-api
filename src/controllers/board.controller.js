@@ -10,7 +10,6 @@ const createNew = async (req, res) => {
             errors: error.message
         })
     }
-    console.log(req.body);
 }
 
 const getFullBoard = async (req, res) => {
@@ -23,7 +22,6 @@ const getFullBoard = async (req, res) => {
             errors: error.message
         })
     }
-    console.log(req.body);
 }
 
 const update = async (req, res) => {

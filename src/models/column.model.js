@@ -1,6 +1,6 @@
 import Joi from 'joi';
 import { getDB } from '~/config/mongodb.js';
-import { ObjectID } from 'mongodb';
+import { ObjectId } from 'mongodb';
 
 const columnCollectionName = 'columns';
 const columnCollectionSchema = Joi.object({
@@ -16,17 +16,25 @@ const validateSchema = async (data) => {
     return await columnCollectionSchema.validateAsync(data, { abortEarly: false });
 }
 
+const findOneById = async (id) => {
+    try {
+        const result = getDB().collection(columnCollectionName).findOne({ _id: ObjectId(id) });
+        return result;
+    } catch (error) {
+        throw new Error(error);
+    }
+}
+
 const createNew = async (data) => {
     try {
         const validatedValue = await validateSchema(data);
         const insertValue = {
             ...validatedValue,
-            boardId: ObjectID(validatedValue.boardId)
+            boardId: ObjectId(validatedValue.boardId)
         }
 
         const result = await getDB().collection(columnCollectionName).insertOne(insertValue);
-        console.log('result: ', result);
-        return insertValue;
+        return result;
     } catch (error) {
         throw new Error(error);
     }
@@ -35,9 +43,9 @@ const createNew = async (data) => {
 const pushCardOrder = async (columnId, cardId) => {
     try {
         const result = await getDB().collection(columnCollectionName).findOneAndUpdate(
-            { _id: ObjectID(columnId) },
+            { _id: ObjectId(columnId) },
             { $push: { cardOrder: cardId } },
-            { returnOriginal: false }
+            { returnDocument: 'after' }
         );
         return result.value;
     } catch (error) {
@@ -51,18 +59,17 @@ const update = async (id, data) => {
             ...data
         }
         if (data.boardId) {
-            updateData.boardId = ObjectID(data.boardId);
+            updateData.boardId = ObjectId(data.boardId);
         }
         const result = await getDB().collection(columnCollectionName).findOneAndUpdate(
-            { _id: ObjectID(id) },
+            { _id: ObjectId(id) },
             { $set: updateData },
-            { returnOriginal: false }
+            { returnDocument: 'after' }
         );
-        console.log('RESULT: ', result);
         return result.value;
     } catch (error) {
         throw new Error(error);
     }
 }
 
-export const ColumnModel = { columnCollectionName, createNew, update, pushCardOrder }
+export const ColumnModel = { columnCollectionName, createNew, update, pushCardOrder, findOneById }

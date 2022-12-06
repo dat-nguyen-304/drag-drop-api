@@ -3,8 +3,9 @@ import { cloneDeep } from 'lodash';
 
 const createNew = async (data) => {
     try {
-        const result = await BoardModel.createNew(data);
-        return result;
+        const createdBoard = await BoardModel.createNew(data);
+        const newBoard = BoardModel.findOneById(createdBoard.insertedId.toString())
+        return newBoard;
     } catch (error) {
         throw new Error(error);
     }

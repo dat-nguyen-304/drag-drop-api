@@ -2,7 +2,7 @@ import Joi from 'joi';
 import { getDB } from '~/config/mongodb.js';
 import { ColumnModel } from './column.model';
 import { CardModel } from './card.model';
-import { ObjectID } from 'mongodb';
+import { ObjectId } from 'mongodb';
 
 const boardCollectionName = 'boards';
 const boardCollectionSchema = Joi.object({
@@ -17,14 +17,20 @@ const validateSchema = async (data) => {
     return await boardCollectionSchema.validateAsync(data, { abortEarly: false });
 }
 
+const findOneById = async (id) => {
+    try {
+        const result = getDB().collection(boardCollectionName).findOne({ _id: ObjectId(id) });
+        return result;
+    } catch (error) {
+        throw new Error(error);
+    }
+}
+
 const createNew = async (data) => {
     try {
         const value = await validateSchema(data);
-        console.log('value: ', value)
-
         const result = await getDB().collection(boardCollectionName).insertOne(value);
-        console.log('result: ', result);
-        return value;
+        return result;
     } catch (error) {
         throw new Error(error);
     }
@@ -33,9 +39,9 @@ const createNew = async (data) => {
 const pushColumnOrder = async (boardId, columnId) => {
     try {
         const result = await getDB().collection(boardCollectionName).findOneAndUpdate(
-            { _id: ObjectID(boardId) },
+            { _id: ObjectId(boardId) },
             { $push: { columnOrder: columnId } },
-            { returnOriginal: false }
+            { returnDocument: 'after' }
         );
         return result.value;
     } catch (error) {
@@ -48,7 +54,7 @@ const getFullBoard = async (id) => {
         const result = await getDB().collection(boardCollectionName).aggregate([
             {
                 $match: {
-                    _id: ObjectID(id),
+                    _id: ObjectId(id),
                     _destroy: false
                 }
             },
@@ -79,15 +85,14 @@ const update = async (id, data) => {
     try {
         const updateData = { ...data };
         const result = await getDB().collection(boardCollectionName).findOneAndUpdate(
-            { _id: ObjectID(id) },
+            { _id: ObjectId(id) },
             { $set: updateData },
-            { returnOriginal: false }
+            { returnDocument: 'after' }
         );
-        console.log('RESULT: ', result);
         return result.value;
     } catch (error) {
         throw new Error(error);
     }
 }
 
-export const BoardModel = { createNew, getFullBoard, pushColumnOrder, update }
+export const BoardModel = { createNew, getFullBoard, pushColumnOrder, update, findOneById }

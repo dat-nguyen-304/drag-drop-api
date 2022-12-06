@@ -3,7 +3,8 @@ import { ColumnModel } from "~/models/column.model";
 
 const createNew = async (data) => {
     try {
-        const newCard = await CardModel.createNew(data);
+        const createdCard = await CardModel.createNew(data);
+        const newCard = await CardModel.findOneById(createdCard.insertedId.toString());
         const columnId = newCard.columnId.toString();
         const newCardId = newCard._id.toString();
         await ColumnModel.pushCardOrder(columnId, newCardId);

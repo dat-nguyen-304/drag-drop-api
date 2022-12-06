@@ -10,13 +10,6 @@ export const connectDB = async () => {
 
     await client.connect();
     dbInstance = client.db(env.DATABASE_NAME);
-
-    // try {
-    //     await listDatabases(client);
-    //     console.log('connect mongo successfully')
-    // } finally {
-    //     await client.close();
-    // }
 }
 
 export const getDB = () => {

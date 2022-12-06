@@ -5,7 +5,6 @@ import { ColumnValidation } from '~/validations/column.validation';
 const router = express.Router();
 
 router.route('/')
-    .get((req, res) => console.log(123))
     .post(ColumnValidation.createNew, ColumnController.createNew)
 
 router.route('/:id')

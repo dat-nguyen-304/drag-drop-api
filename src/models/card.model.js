@@ -1,6 +1,6 @@
 import Joi from 'joi';
 import { getDB } from '~/config/mongodb.js';
-import { ObjectID } from 'mongodb';
+import { ObjectId } from 'mongodb';
 
 const cardCollectionName = 'cards';
 const cardCollectionSchema = Joi.object({
@@ -17,18 +17,26 @@ const validateSchema = async (data) => {
     return await cardCollectionSchema.validateAsync(data, { abortEarly: false });
 }
 
+const findOneById = async (id) => {
+    try {
+        const result = getDB().collection(cardCollectionName).findOne({ _id: ObjectId(id) });
+        return result;
+    } catch (error) {
+        throw new Error(error);
+    }
+}
+
 const createNew = async (data) => {
     try {
         const validatedValue = await validateSchema(data);
         const insertValue = {
             ...validatedValue,
-            boardId: ObjectID(validatedValue.boardId),
-            columnId: ObjectID(validatedValue.columnId)
+            boardId: ObjectId(validatedValue.boardId),
+            columnId: ObjectId(validatedValue.columnId)
         }
 
         const result = await getDB().collection(cardCollectionName).insertOne(insertValue);
-        console.log('result: ', result);
-        return insertValue;
+        return result;
     } catch (error) {
         throw new Error(error);
     }
@@ -37,14 +45,13 @@ const createNew = async (data) => {
 const update = async (id, data) => {
     try {
         const updateData = { ...data };
-        if (data.boardId) updateData.boardId = ObjectID(data.boardId);
-        if (data.columnId) updateData.columnId = ObjectID(data.columnId);
+        if (data.boardId) updateData.boardId = ObjectId(data.boardId);
+        if (data.columnId) updateData.columnId = ObjectId(data.columnId);
         const result = await getDB().collection(cardCollectionName).findOneAndUpdate(
-            { _id: ObjectID(id) },
+            { _id: ObjectId(id) },
             { $set: updateData },
-            { returnOriginal: false }
+            { returnDocument: 'after' }
         );
-        console.log('RESULT: ', result);
         return result.value;
     } catch (error) {
         throw new Error(error);
@@ -53,7 +60,7 @@ const update = async (id, data) => {
 
 const deleteByColumn = async (ids) => {
     try {
-        ids = ids.map(id => ObjectID(id));
+        ids = ids.map(id => ObjectId(id));
         const result = await getDB().collection(cardCollectionName).updateMany(
             { _id: { $in: ids } },
             { $set: { _destroy: true } }
@@ -64,4 +71,4 @@ const deleteByColumn = async (ids) => {
     }
 }
 
-export const CardModel = { cardCollectionName, createNew, update, deleteByColumn }
+export const CardModel = { cardCollectionName, createNew, update, deleteByColumn, findOneById }
