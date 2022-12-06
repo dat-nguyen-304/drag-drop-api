@@ -75,4 +75,19 @@ const getFullBoard = async (id) => {
     }
 }
 
-export const BoardModel = { createNew, getFullBoard, pushColumnOrder }
+const update = async (id, data) => {
+    try {
+        const updateData = { ...data };
+        const result = await getDB().collection(boardCollectionName).findOneAndUpdate(
+            { _id: ObjectID(id) },
+            { $set: updateData },
+            { returnOriginal: false }
+        );
+        console.log('RESULT: ', result);
+        return result.value;
+    } catch (error) {
+        throw new Error(error);
+    }
+}
+
+export const BoardModel = { createNew, getFullBoard, pushColumnOrder, update }
